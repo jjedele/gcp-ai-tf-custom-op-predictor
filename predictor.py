@@ -15,50 +15,50 @@ class CustomOpTfPredictor:
     TensorFlow models depending on custom operators."""
 
     @classmethod
-    def from_path(cls, model_dir: str) -> "CustomOpTfPredictor":
+    def from_path(cls, model_dir):
         """Create an instance of CustomOpTfPredictor from the given path.
 
         Args:
-            model_dir: The path to the stored model.
+            model_dir (str): The path to the stored model.
 
         Returns:
-            The created predictor instance.
+            CustomOpTfPredictor: The created predictor instance.
         """
         predictor = tf.contrib.predictor.from_saved_model(model_dir)
         return cls(predictor)
 
-    def __init__(self, predictor: predictor.Predictor) -> None:
+    def __init__(self, predictor: predictor.Predictor):
         """Constructor.
 
         Args:
-            predictor: Predictor for loaded model.
+            predictor (predictor.Predictor): Predictor for loaded model.
         """
         self._predictor = predictor
 
-    def predict(self, instances: RecordData, **kwargs: Any) -> RecordData:
+    def predict(self, instances, **kwargs):
         """Make predictions for given data.
 
         Args:
-            instances: A list of prediction input instances.
-            **kwargs: A dictionary of keyword args provided as additional
+            instances (RecordData): A list of prediction input instances.
+            **kwargs (Any): A dictionary of keyword args provided as additional
                 fields on the predict request body.
 
         Returns:
-            A list of outputs containing the prediction results.
+            RecordData: A list of outputs containing the prediction results.
         """
         model_input = self._to_tensor_format(instances)
         model_output = self._predictor(model_input)
         reply = self._to_record_format(model_output)
         return reply
 
-    def _to_tensor_format(self, instances: RecordData) -> TensorData:
+    def _to_tensor_format(self, instances):
         """Convert data from record format to tensor format.
 
         Args:
-            instances: Data instances as received in API request.
+            instances (RecordData): Data instances as received in API request.
 
         Returns:
-            Mapping of fields to data tensors as expected by tf.contrib.predictor.
+            TensorData: Mapping of fields to data tensors as expected by tf.contrib.predictor.
 
         Example:
             >>> p._to_tensor_format([{"k1": "v11", "k2": "v12"}, {"k1": "v21", "k2": "v22"}])
@@ -81,14 +81,14 @@ class CustomOpTfPredictor:
 
         return restructured
 
-    def _to_record_format(self, data: TensorData) -> RecordData:
+    def _to_record_format(self, data):
         """Convert data from tensor format to record format.
 
         Args:
-            data: Data in tensor format as returned by tf.contrib.predictor.
+            data (RecordData): Data in tensor format as returned by tf.contrib.predictor.
 
         Returns:
-            List of JSON serializable data records.
+            TensorData: List of JSON serializable data records.
         
         Example:
             >>> p._to_record_format({"k1": ["v11", "v21"], "k2": ["v12", "v22"]})
