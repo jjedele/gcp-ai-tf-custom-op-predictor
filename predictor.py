@@ -75,8 +75,6 @@ class CustomOpTfPredictor:
         # restructure data
         restructured = {}
         for key in keys:
-            # we use .get() over [] because it gives us np.ndarray elements
-            # as plain Python data which is JSON serializable
             restructured[key] = [instance.get(key) for instance in instances]
 
         return restructured
@@ -99,7 +97,17 @@ class CustomOpTfPredictor:
 
         restructured = []
         for i in range(n_preds):
-            restructured.append({key: data[key].item(i) for key in keys})
+            record = {}
+
+            for key in keys:
+                # .item() returns elements as plain, JSON-serializable Python types
+                value = data[key].item(i)
+                # only UTF8 strings supported for now
+                if type(value) == bytes:
+                    value = value.decode("utf8")
+                record[key] = value
+
+            restructured.append(record)
 
         return restructured
 
